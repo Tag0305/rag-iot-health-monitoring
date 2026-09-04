@@ -13,16 +13,16 @@
 
 ## 📌 Executive Summary
 
-Developed as an **8th Semester Major Project**, this repository presents an end-to-end intelligent clinical decision-support framework that bridges real-time embedded sensing with explainable artificial intelligence.
+Developed as an **8th Semester Major Project**, this repository presents an end-to-end intelligent **health-monitoring decision-support prototype** that bridges real-time embedded sensing with explainable artificial intelligence.
 
-While modern wearable and ambient IoT health monitors capture continuous physiological signals, raw telemetry streams alone lack actionable clinical interpretation, automated triage reasoning, and historical cohort context. At the same time, ungrounded Large Language Models (LLMs) risk clinical hallucinations and lack adherence to deterministic safety boundaries.
+While modern wearable and ambient IoT health monitors capture continuous physiological signals, raw telemetry streams alone lack automated triage reasoning, risk indicator context, and historical reference. At the same time, ungrounded Large Language Models (LLMs) risk generating misleading assertions and lack adherence to deterministic rule boundaries.
 
-The **RAG-Enhanced IoT Health Monitoring & Explainable Feedback System** bridges this critical gap by unifying five core components:
+The **RAG-Enhanced IoT Health Monitoring & Explainable Feedback System** addresses this challenge by unifying five core components:
 1. **IoT Health Telemetry**: Streaming real-time physiological vitals—body temperature, pulse/heart rate, and oxygen saturation (SpO₂)—via ThingSpeak cloud REST APIs (coupled with an offline telemetry simulator for resilient edge operation).
 2. **Robust Preprocessing**: Automated signal cleansing, timestamp synchronization, type coercion, and statistical rolling aggregation (mean, min, max, trend analysis).
-3. **Rule-Based Risk Flagging**: A deterministic, threshold-driven triage engine providing instant physiological screening for individual vital anomalies (pyrexia, hypothermia, tachycardia, bradycardia, hypoxemia) as well as critical multi-system compound interactions (e.g., cardiopulmonary distress and sepsis risks).
-4. **FAISS Semantic Retrieval**: Dense vector-similarity retrieval across curated historical patient cohorts using Hugging Face sentence transformers (`all-MiniLM-L6-v2`) and FAISS (`IndexFlatL2`) to surface clinically analogous cases in sub-millisecond time.
-5. **RAG/LLM-Generated Explainable Feedback**: Multi-stage clinical reasoning powered by Gemini 2.0 Flash (with deterministic local fallbacks) that synthesizes live telemetry, rule-based alarm status, and retrieved cohort trajectories into clear, transparent, and grounded clinical summaries and interactive Q&A.
+3. **Rule-Based Risk Flagging**: A deterministic engine driven by configurable rule-based thresholds providing instant screening for individual vital anomalies (pyrexia, hypothermia, tachycardia, bradycardia, hypoxemia) as well as compound risk indicators (e.g.,compound multi-vital risk indicators).
+4. **FAISS Semantic Retrieval**: Dense vector-similarity retrieval across curated synthetic/sample vital records using Hugging Face sentence transformers (`all-MiniLM-L6-v2`) and a **FAISS vector index** (`IndexFlatL2`) to surface semantically similar historical/sample records.
+5. **RAG/LLM-Generated Explainable Feedback**: Multi-stage reasoning powered by Gemini 2.0 Flash (with deterministic local fallbacks) that synthesizes live telemetry, rule-based alarm status, and retrieved sample records into clear, transparent, and grounded explainable health feedback and interactive conversational Q&A.
 6. **Interactive Dashboard**: A responsive Gradio user interface supporting demographic input profiles, telemetry inspection, retrieval verification, and conversational health guidance.
 
 ---
@@ -47,31 +47,31 @@ flowchart TD
         Clean --> Stats["Vital Signs Summarization<br/>(Mean, Min, Max, Trends)"]
     end
 
-    subgraph Reasoning["3. Hybrid Clinical Reasoning"]
-        Stats --> Rules["src/rules_engine.py<br/>Deterministic Thresholds & Severity"]
+    subgraph Reasoning["3. Health Rule & Vector Analysis"]
+        Stats --> Rules["src/rules_engine.py<br/>Configurable Thresholds & Risk Flags"]
         Stats --> QueryGen["Query Vector Construction"]
         
         subgraph RAG_Engine["FAISS Vector Store (src/vector_store.py)"]
-            CohortDB[("Historical Patient Cohorts<br/>patient_vital_records.csv")]
+            CohortDB[("Curated Synthetic Vital Records<br/>patient_vital_records.csv")]
             Encoder["SentenceTransformer<br/>all-MiniLM-L6-v2"]
             FAISSIndex[("FAISS IndexFlatL2<br/>(384-d Dense Index)")]
             CohortDB --> Encoder --> FAISSIndex
         end
 
         QueryGen -->|Dense Search| FAISSIndex
-        FAISSIndex -->|Top-k Similar Cases| PromptSynthesis["Prompt Synthesis & Grounding"]
+        FAISSIndex -->|Top-k Similar Sample Records| PromptSynthesis["Prompt Synthesis & Grounding"]
         Rules -->|Alerts & Triage Status| PromptSynthesis
         Stats -->|Aggregated Vitals| PromptSynthesis
     end
 
     subgraph LLM_Synthesis["4. Explainable LLM Feedback"]
         PromptSynthesis --> Gemini["src/llm_agent.py<br/>Gemini 2.0 Flash / Fallback Engine"]
-        Gemini --> Insights["Clinical Decision Support & Explainable Summary"]
+        Gemini --> Insights["Explainable Health Feedback & Summary"]
     end
 
     subgraph Interface["5. User Interaction"]
         Insights --> Gradio["Interactive Gradio Dashboard (src/app.py)"]
-        User["Clinician / Patient"] <-->|Q&A Chatbot| Gradio
+        User["User / Reviewer"] <-->|Q&A Chatbot| Gradio
     end
 ```
 
@@ -79,32 +79,33 @@ flowchart TD
 
 ## 🔬 Key Engineering Highlights
 
-### 1. Robust Preprocessing & Bug Resolution
-- **Sensor Mapping Fix**: Rectified an inverted channel mapping bug from early prototypes where temperature was mapped to SpO₂ (producing fatal 99°C temperature readings and 36% oxygen saturation). Cleanly maps:
+### 1. Robust Preprocessing & Signal Cleansing
+- **Sensor Mapping Fix**: Rectified an inverted channel mapping bug from early exploratory prototypes where temperature was mapped to SpO₂ (producing distorted 99°C temperature readings and 36% oxygen saturation). Cleanly maps:
   - `field1` &rarr; Oxygen Saturation (SpO₂ %)
   - `field2` &rarr; Heart Rate / Pulse (BPM)
   - `field3` &rarr; Body Temperature (°C)
 - **Signal Cleansing**: Automated coercion, NaN filtering, and statistical rolling aggregation (mean, min, max).
 
-### 2. Deterministic Clinical Rule Engine
-Implements evidence-based thresholds and compound clinical rules:
-| Vital Sign | Normal Range | Alert Threshold | Clinical Condition | Severity |
+### 2. Deterministic Rule Engine & Risk Flagging
+Implements configurable rule-based thresholds and compound risk indicators:
+| Vital Sign | Reference Range | Alert Threshold | Risk Flag / Condition | Severity |
 | :--- | :--- | :--- | :--- | :--- |
-| **Body Temp** | 36.1 – 37.2 °C | `> 37.5 °C` | Pyrexia / Fever | WARNING |
-| **Body Temp** | 36.1 – 37.2 °C | `< 35.0 °C` | Hypothermia | CRITICAL |
-| **SpO₂** | 95.0 – 100.0% | `< 95.0%` | Mild Hypoxemia | WARNING |
-| **SpO₂** | 95.0 – 100.0% | `< 90.0%` | Severe Hypoxemia | CRITICAL |
-| **Heart Rate** | 60 – 100 BPM | `> 100 BPM` | Tachycardia | WARNING |
-| **Heart Rate** | 60 – 100 BPM | `< 60 BPM` | Bradycardia | WARNING |
-| **Compound** | — | `Temp > 37.5` & `SpO₂ < 95%` | Suspected Respiratory Infection | WARNING |
-| **Compound** | — | `HR > 100` & `SpO₂ < 95%` | Cardiopulmonary Stress | CRITICAL |
-| **Compound** | — | `Temp > 38.0` & `HR > 100` | Sepsis / Systemic Infection Risk | CRITICAL |
+| **Body Temp** | 36.1 – 37.2 °C | `> 37.5 °C` | Pyrexia / Elevated Temperature | WARNING |
+| **Body Temp** | 36.1 – 37.2 °C | `< 35.0 °C` | Hypothermia Indicator | CRITICAL |
+| **SpO₂** | 95.0 – 100.0% | `< 95.0%` | Mild Hypoxemia Flag | WARNING |
+| **SpO₂** | 95.0 – 100.0% | `< 90.0%` | Severe Hypoxemia Flag | CRITICAL |
+| **Heart Rate** | 60 – 100 BPM | `> 100 BPM` | Tachycardia Indicator | WARNING |
+| **Heart Rate** | 60 – 100 BPM | `< 60 BPM` | Bradycardia Indicator | WARNING |
+| **Compound** | — | `Temp > 37.5` & `SpO₂ < 95%` | Suspected Respiratory Distress Signal | WARNING |
+| **Compound** | — | `HR > 100` & `SpO₂ < 95%` | Cardiopulmonary Stress Signal | CRITICAL |
+| **Compound** | — | `Temp > 38.0` & `HR > 100` |  | CRITICAL High Temperature + Elevated Heart Rate Risk Flag
 
-### 3. Genuine FAISS Semantic Retrieval (RAG)
-Replaced static top-50 CSV slices with a production **FAISS vector database**:
-- Encodes clinical case narratives using `sentence-transformers/all-MiniLM-L6-v2` into 384-dimensional dense vectors.
-- Queries `faiss.IndexFlatL2` in milliseconds to surface the top-$k$ most clinically and demographically similar historical patient profiles.
-- Formats retrieved patient histories directly into Gemini's context window for grounded diagnostic comparisons.
+### 3. FAISS Vector Retrieval (RAG)
+Replaced static top-50 CSV slices with a **FAISS-based similarity index**:
+- Encodes synthetic health record narratives using `sentence-transformers/all-MiniLM-L6-v2` into 384-dimensional dense vectors.
+- Queries `faiss.IndexFlatL2` to surface the top-$k$ most demographically and physiologically similar synthetic sample records.
+- Formats retrieved records directly into Gemini's context window for grounded contextual comparisons.
+- **Dataset Note**: The historical database (`patient_vital_records.csv`) consists entirely of curated, synthetic benchmark health records generated for educational testing; it contains no real patient identifiable data.
 
 ### 4. Zero-Cost Offline Resilience
 - Automatically falls back to deterministic local mock telemetry and structured AI synthesis when credentials or internet access are unavailable.
@@ -120,21 +121,21 @@ rag-iot-health-monitoring/
 │   └── workflows/
 │       └── ci.yml                     # Continuous integration (tests & linting)
 ├── data/
-│   ├── sample_iot_feeds.json          # Curated ThingSpeak telemetry stream
-│   └── patient_vital_records.csv      # 200-patient clinical cohort dataset
+│   ├── sample_iot_feeds.json          # Curated ThingSpeak telemetry stream (synthetic sample)
+│   └── patient_vital_records.csv      # 200-record synthetic health records dataset
 ├── src/
 │   ├── __init__.py                    # Package declarations
-│   ├── config.py                      # Environment config & clinical thresholds
+│   ├── config.py                      # Environment config & configurable rule-based thresholds
 │   ├── iot_client.py                  # ThingSpeak client + synthetic fallback
 │   ├── preprocessing.py               # Data cleaning & vital aggregation
-│   ├── rules_engine.py                # Deterministic rule evaluation & risk scoring
+│   ├── rules_engine.py                # Deterministic rule evaluation & risk flagging
 │   ├── vector_store.py                # FAISS indexing & top-k semantic retrieval
 │   ├── llm_agent.py                   # Gemini 2.0 Flash agent + mock synthesizer
 │   └── app.py                         # Interactive Gradio UI & chat interface
 ├── tests/
 │   ├── __init__.py
 │   ├── test_preprocessing.py          # Data cleansing & statistical tests
-│   ├── test_rules_engine.py           # Single & compound clinical rule tests
+│   ├── test_rules_engine.py           # Single & compound rule tests
 │   ├── test_vector_store.py           # FAISS indexing & retrieval tests
 │   ├── test_iot_client.py             # Telemetry fetch & fallback tests
 │   └── test_llm_agent.py              # LLM prompt & mock synthesis tests
@@ -142,7 +143,7 @@ rag-iot-health-monitoring/
 ├── .gitignore                         # Comprehensive git ignore rules
 ├── LICENSE                            # MIT Open Source License
 ├── pyproject.toml                     # Modern package metadata & pytest config
-├── requirements.txt                   # Pinned production dependencies
+├── requirements.txt                   # Python project dependencies
 └── llm_and_healthcare.ipynb           # Original reference research notebook
 ```
 
@@ -197,10 +198,10 @@ python -m pytest -v --tb=short
 
 Test coverage includes:
 - **Preprocessing**: Channel mapping, dirty string coercion, null-row dropping, and statistical calculations.
-- **Rules Engine**: Normal ranges, pyrexia, hypothermia, bradycardia, tachycardia, hypoxemia, compound sepsis risk, and customizable thresholds.
+- **Rules Engine**: Normal ranges, pyrexia, hypothermia, bradycardia, tachycardia, hypoxemia, compound risk flags, and configurable rule-based thresholds.
 - **Vector Store**: FAISS embedding generation, index dimensions (384-d), top-k distance ranking, and prompt formatting.
 - **IoT Ingestion**: Live HTTP calls, graceful offline fallback, and synthetic feed generation.
-- **LLM Agent**: Prompt assembly, clinical grounding context, and deterministic mock synthesis.
+- **LLM Agent**: Prompt assembly, sample record grounding context, and deterministic mock synthesis.
 
 ---
 
@@ -217,16 +218,16 @@ Open your browser at `http://127.0.0.1:7860`.
 2. Enter your **ThingSpeak Channel ID** or keep **Offline Mode** selected.
 3. Click **⚡ Run Telemetry & RAG Analysis**.
 4. Inspect:
-   - **Telemetry & Rules**: Summary statistics and triage classification (`NORMAL`, `WARNING`, `CRITICAL`).
-   - **Vector Retrieval**: Top-k matching historical cases from the 200-patient cohort.
-   - **Gemini Explainable AI**: Clinical synthesis with rationale and grounded recommendations.
-5. Engage with the **Conversational Clinical Assistant** to ask questions regarding symptoms, trends, and risk factors.
+   - **Telemetry & Rules**: Summary statistics and risk indicator status (`NORMAL`, `WARNING`, `CRITICAL`).
+   - **Vector Retrieval**: Top-k matching sample records from the 200-record synthetic dataset.
+   - **Gemini Explainable AI**: Explainable health feedback with contextual rationale and monitoring recommendations.
+5. Engage with the **Conversational Health Assistant** to ask questions regarding symptoms, trends, and risk factors.
 
 ---
 
 ## ⚠️ Medical Disclaimer
 
-> **IMPORTANT**: This software is designed strictly for research, educational, and portfolio demonstration purposes. It does **not** constitute medical advice, clinical diagnosis, or a certified medical device. Always consult certified healthcare professionals for medical triage, diagnosis, and treatment.
+> **IMPORTANT**: Research and educational demonstration only. This application is not a medical device and is not intended to diagnose, treat, or replace professional medical advice.
 
 ---
 
