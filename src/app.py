@@ -4,7 +4,7 @@ Built with Gradio, featuring patient profile controls, telemetry inspection,
 rule-based clinical alerts, FAISS historical case retrieval, and conversational AI.
 """
 
-from typing import Any, Dict, List, Tuple
+from typing import List, Tuple
 import logging
 
 from src.config import Settings, default_settings
@@ -251,7 +251,6 @@ def main():
     """Application entry point."""
     app = HealthMonitoringApp()
     try:
-        import gradio as gr
         demo = create_gradio_ui(app)
         demo.launch(
             server_name=app.settings.server_host,

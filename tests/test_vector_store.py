@@ -2,8 +2,6 @@
 Unit tests for FAISS vector store indexing and semantic retrieval.
 """
 
-from pathlib import Path
-import pytest
 
 from src.config import Settings
 from src.vector_store import PatientRAGRetriever, RetrievedCase

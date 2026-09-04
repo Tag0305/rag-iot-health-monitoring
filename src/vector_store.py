@@ -5,7 +5,7 @@ FAISS Vector Store and Semantic Retrieval Engine for historical patient cohorts.
 from dataclasses import dataclass
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
 import numpy as np
 import pandas as pd
 
