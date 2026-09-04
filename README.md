@@ -6,8 +6,7 @@
 [![Tests: Pytest](https://img.shields.io/badge/Tests-Passing-brightgreen.svg)](#testing--verification)
 
 > **Author & Maintainer**: [Ronanki Tagore](https://github.com/Tag0305)  
-> **Academic Context**: 8th Semester Major Project  
-> **Repository**: [https://github.com/Tag0305/rag-iot-health-monitoring](https://github.com/Tag0305/rag-iot-health-monitoring)
+> **Academic Context**: 7th Semester Major Project> **Repository**: [https://github.com/Tag0305/rag-iot-health-monitoring](https://github.com/Tag0305/rag-iot-health-monitoring)
 
 ---
 
@@ -20,7 +19,7 @@ While modern wearable and ambient IoT health monitors capture continuous physiol
 The **RAG-Enhanced IoT Health Monitoring & Explainable Feedback System** addresses this challenge by unifying five core components:
 1. **IoT Health Telemetry**: Streaming real-time physiological vitals—body temperature, pulse/heart rate, and oxygen saturation (SpO₂)—via ThingSpeak cloud REST APIs (coupled with an offline telemetry simulator for resilient edge operation).
 2. **Robust Preprocessing**: Automated signal cleansing, timestamp synchronization, type coercion, and statistical rolling aggregation (mean, min, max, trend analysis).
-3. **Rule-Based Risk Flagging**: A deterministic engine driven by configurable rule-based thresholds providing instant screening for individual vital anomalies (pyrexia, hypothermia, tachycardia, bradycardia, hypoxemia) as well as compound risk indicators (e.g.,compound multi-vital risk indicators).
+3. **Rule-Based Risk Flagging**: A deterministic engine driven by configurable rule-based thresholds providing instant screening for individual vital anomalies (pyrexia, hypothermia, tachycardia, bradycardia, hypoxemia) as well as compound multi-vital risk indicators..
 4. **FAISS Semantic Retrieval**: Dense vector-similarity retrieval across curated synthetic/sample vital records using Hugging Face sentence transformers (`all-MiniLM-L6-v2`) and a **FAISS vector index** (`IndexFlatL2`) to surface semantically similar historical/sample records.
 5. **RAG/LLM-Generated Explainable Feedback**: Multi-stage reasoning powered by Gemini 2.0 Flash (with deterministic local fallbacks) that synthesizes live telemetry, rule-based alarm status, and retrieved sample records into clear, transparent, and grounded explainable health feedback and interactive conversational Q&A.
 6. **Interactive Dashboard**: A responsive Gradio user interface supporting demographic input profiles, telemetry inspection, retrieval verification, and conversational health guidance.
