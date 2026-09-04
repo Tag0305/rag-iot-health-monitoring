@@ -1,0 +1,21 @@
+# Core Data Processing & Analysis
+pandas>=2.0.0
+numpy>=1.24.0
+requests>=2.28.0
+
+# Vector Embeddings & Similarity Retrieval (RAG)
+sentence-transformers>=2.2.0
+faiss-cpu>=1.7.4
+
+# Generative AI & LLM Orchestration
+google-generativeai>=0.8.0
+
+# User Interface
+gradio>=4.0.0
+
+# Configuration & Environment
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+
+# Testing & Quality Assurance
+pytest>=7.4.0
