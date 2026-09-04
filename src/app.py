@@ -106,7 +106,7 @@ class HealthMonitoringApp:
 
         rules_display = (
             f"### Triage Classification: {severity_badge}\n\n"
-            f"**Clinical Flags Triggered:**\n"
+            f"**Risk Flags Triggered:**\n"
             f"{diagnosis.explanation}"
         )
 
@@ -160,14 +160,15 @@ def create_gradio_ui(app: HealthMonitoringApp):
     """Construct modern Gradio interface."""
     import gradio as gr
 
-    custom_css = """
-    .status-box { border-radius: 8px; padding: 12px; }
-    """
-
-    with gr.Blocks(title="RAG-Enhanced IoT Health Monitoring", css=custom_css) as demo:
+    with gr.Blocks(title="RAG-Enhanced IoT Health Monitoring") as demo:
         gr.Markdown(
             "# 🩺 RAG-Enhanced IoT Health Monitoring & Explainable Feedback System\n"
-            "**Continuous IoT Sensor Telemetry • Deterministic Clinical Rules • FAISS RAG • Gemini 2.0 Flash**"
+            "**Continuous IoT Sensor Telemetry • Deterministic Clinical Rules • FAISS RAG • Gemini 3.8 Flash**"
+        )
+        gr.Markdown(
+            "> ⚠️ **Disclaimer**: Research and educational demonstration only. "
+            "This application is not a medical device and is not intended to diagnose, "
+            "treat, or replace professional medical advice."
         )
 
         with gr.Row():
@@ -185,7 +186,7 @@ def create_gradio_ui(app: HealthMonitoringApp):
                     placeholder="e.g. 2684921",
                 )
                 key_input = gr.Textbox(
-                    value=app.settings.thingspeak_read_api_key,
+                    value="",
                     label="Read API Key (leave empty for mock)",
                     type="password",
                 )
@@ -202,17 +203,17 @@ def create_gradio_ui(app: HealthMonitoringApp):
                     rules_box = gr.Markdown("")
 
                 with gr.Tab("🔍 Vector Retrieval (FAISS)"):
-                    gr.Markdown("#### Clinically Similar Historical Patient Records")
+                    gr.Markdown("#### Semantically Similar Synthetic/Sample Records")
                     retrieval_box = gr.Markdown("Historical cases will appear after analysis.")
 
                 with gr.Tab("🧠 Gemini Explainable AI"):
-                    gr.Markdown("#### Automated Clinical Synthesis")
+                    gr.Markdown("#### Automated Health Summary")
                     ai_summary_box = gr.Markdown("")
                     gr.Markdown("#### Grounded RAG Decision Support")
                     rag_output_box = gr.Markdown("")
 
         gr.Markdown("---")
-        gr.Markdown("### 💬 Conversational Clinical Assistant")
+        gr.Markdown("### 💬 Conversational Health Assistant")
         chatbot = gr.Chatbot(height=300)
         with gr.Row():
             msg_input = gr.Textbox(

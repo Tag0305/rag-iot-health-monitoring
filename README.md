@@ -1,13 +1,25 @@
+---
+title: RAG Enhanced IoT Health Monitoring
+emoji: 🩺
+colorFrom: blue
+colorTo: green
+sdk: gradio
+python_version: "3.11"
+app_file: app.py
+pinned: false
+---
+
 # 🩺 RAG-Enhanced IoT Health Monitoring & Explainable Feedback System
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Architecture: RAG](https://img.shields.io/badge/Architecture-FAISS%20%2B%20Gemini%202.0%20Flash-orange.svg)](#system-architecture)
+[![Architecture: RAG](https://img.shields.io/badge/Architecture-FAISS%20%2B%20Gemini%203.8%20Flash-orange.svg)](#system-architecture)
 [![Tests: Pytest](https://img.shields.io/badge/Tests-Passing-brightgreen.svg)](#testing--verification)
 
 > **Author & Maintainer**: [Ronanki Tagore](https://github.com/Tag0305)
 > **Academic Context**: 7th Semester Major Project
 > **Repository**: [https://github.com/Tag0305/rag-iot-health-monitoring](https://github.com/Tag0305/rag-iot-health-monitoring)
+
 ---
 
 ## 📌 Executive Summary
@@ -21,7 +33,7 @@ The **RAG-Enhanced IoT Health Monitoring & Explainable Feedback System** address
 2. **Robust Preprocessing**: Automated signal cleansing, timestamp synchronization, type coercion, and statistical rolling aggregation (mean, min, max, trend analysis).
 3. **Rule-Based Risk Flagging**: A deterministic engine driven by configurable rule-based thresholds providing instant screening for individual vital anomalies (pyrexia, hypothermia, tachycardia, bradycardia, hypoxemia) as well as compound multi-vital risk indicators.
 4. **FAISS Semantic Retrieval**: Dense vector-similarity retrieval across curated synthetic/sample vital records using Hugging Face sentence transformers (`all-MiniLM-L6-v2`) and a **FAISS vector index** (`IndexFlatL2`) to surface semantically similar historical/sample records.
-5. **RAG/LLM-Generated Explainable Feedback**: Multi-stage reasoning powered by Gemini 2.0 Flash (with deterministic local fallbacks) that synthesizes live telemetry, rule-based alarm status, and retrieved sample records into clear, transparent, and grounded explainable health feedback and interactive conversational Q&A.
+5. **RAG/LLM-Generated Explainable Feedback**: Multi-stage reasoning powered by Gemini 3.8 Flash (with deterministic local fallbacks) that synthesizes live telemetry, rule-based alarm status, and retrieved sample records into clear, transparent, and grounded explainable health feedback and interactive conversational Q&A.
 6. **Interactive Dashboard**: A responsive Gradio user interface supporting demographic input profiles, telemetry inspection, retrieval verification, and conversational health guidance.
 
 ---
@@ -64,7 +76,7 @@ flowchart TD
     end
 
     subgraph LLM_Synthesis["4. Explainable LLM Feedback"]
-        PromptSynthesis --> Gemini["src/llm_agent.py<br/>Gemini 2.0 Flash / Fallback Engine"]
+        PromptSynthesis --> Gemini["src/llm_agent.py<br/>Gemini 3.8 Flash / Fallback Engine"]
         Gemini --> Insights["Explainable Health Feedback & Summary"]
     end
 
@@ -129,7 +141,7 @@ rag-iot-health-monitoring/
 │   ├── preprocessing.py               # Data cleaning & vital aggregation
 │   ├── rules_engine.py                # Deterministic rule evaluation & risk flagging
 │   ├── vector_store.py                # FAISS indexing & top-k semantic retrieval
-│   ├── llm_agent.py                   # Gemini 2.0 Flash agent + mock synthesizer
+│   ├── llm_agent.py                   # Gemini 3.8 Flash agent + mock synthesizer
 │   └── app.py                         # Interactive Gradio UI & chat interface
 ├── tests/
 │   ├── __init__.py
@@ -178,7 +190,7 @@ Edit `.env`:
 ```env
 # Optional: Needed for live Gemini AI generation (get at https://aistudio.google.com/)
 GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-2.0-flash
+GEMINI_MODEL=gemini-3.8-flash
 
 # Optional: ThingSpeak IoT Channel (mock telemetry is used if omitted)
 THINGSPEAK_CHANNEL_ID=your_channel_id
