@@ -2,12 +2,13 @@
 ThingSpeak IoT Client for fetching live and fallback sensor telemetry streams.
 """
 
-from datetime import datetime, timedelta
 import json
 import logging
-from pathlib import Path
 import random
-from typing import Any, Dict, List, Optional, Tuple
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any
+
 import requests
 
 from src.config import Settings, default_settings
@@ -21,16 +22,16 @@ class ThingSpeakClient:
     with an integrated deterministic fallback/mock engine for offline evaluation.
     """
 
-    def __init__(self, settings: Optional[Settings] = None):
+    def __init__(self, settings: Settings | None = None):
         self.settings = settings or default_settings
 
     def fetch_feeds(
         self,
-        channel_id: Optional[str] = None,
-        read_api_key: Optional[str] = None,
-        results: Optional[int] = None,
+        channel_id: str | None = None,
+        read_api_key: str | None = None,
+        results: int | None = None,
         force_mock: bool = False,
-    ) -> Tuple[List[Dict[str, Any]], str]:
+    ) -> tuple[list[dict[str, Any]], str]:
         """
         Fetch feeds from ThingSpeak. If credentials are missing, force_mock is True,
         or the HTTP request fails, returns deterministic mock telemetry.
@@ -55,7 +56,7 @@ class ThingSpeakClient:
                     "ThingSpeak request returned HTTP %s. Falling back to mock telemetry.",
                     response.status_code
                 )
-            except Exception as e:
+            except requests.RequestException as e:
                 logger.warning(
                     "Failed to connect to ThingSpeak (%s). Falling back to mock telemetry.",
                     str(e)
@@ -64,7 +65,7 @@ class ThingSpeakClient:
         # Fallback to local sample or synthetic generation
         return self._load_fallback_feeds(count), "mock (local telemetry simulation)"
 
-    def _load_fallback_feeds(self, count: int) -> List[Dict[str, Any]]:
+    def _load_fallback_feeds(self, count: int) -> list[dict[str, Any]]:
         """Load feeds from local sample JSON if available, else generate synthetic vitals."""
         sample_path: Path = self.settings.sample_feeds_path
         if sample_path.exists():
@@ -74,17 +75,17 @@ class ThingSpeakClient:
                     feeds = data.get("feeds", [])
                     if feeds:
                         return feeds[-count:] if len(feeds) > count else feeds
-            except Exception as err:
+            except (OSError, json.JSONDecodeError, ValueError, TypeError) as err:
                 logger.error("Error reading sample_iot_feeds.json: %s", err)
 
         # Generate on-the-fly synthetic data if file is missing
         return self._generate_synthetic_feeds(count)
 
     @staticmethod
-    def _generate_synthetic_feeds(count: int = 50) -> List[Dict[str, Any]]:
+    def _generate_synthetic_feeds(count: int = 50) -> list[dict[str, Any]]:
         """Generate deterministic, realistic IoT vital signs."""
         random_gen = random.Random(42)
-        start_time = datetime.now() - timedelta(seconds=count * 20)
+        start_time = datetime.now(timezone.utc) - timedelta(seconds=count * 20)
         feeds = []
         for i in range(1, count + 1):
             ts = (start_time + timedelta(seconds=i * 20)).strftime("%Y-%m-%dT%H:%M:%SZ")

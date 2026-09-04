@@ -3,7 +3,8 @@ Data preprocessing, cleaning, and statistical aggregation for IoT vital telemetr
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import numpy as np
 import pandas as pd
 
@@ -12,19 +13,19 @@ import pandas as pd
 class VitalSummary:
     """Summary statistics aggregated across a telemetry window."""
     reading_count: int
-    avg_temp: Optional[float]
-    min_temp: Optional[float]
-    max_temp: Optional[float]
-    avg_hr: Optional[float]
-    min_hr: Optional[float]
-    max_hr: Optional[float]
-    avg_spo2: Optional[float]
-    min_spo2: Optional[float]
-    max_spo2: Optional[float]
+    avg_temp: float | None
+    min_temp: float | None
+    max_temp: float | None
+    avg_hr: float | None
+    min_hr: float | None
+    max_hr: float | None
+    avg_spo2: float | None
+    min_spo2: float | None
+    max_spo2: float | None
     formatted_text: str
 
 
-def clean_sensor_data(feeds: List[Dict[str, Any]]) -> pd.DataFrame:
+def clean_sensor_data(feeds: list[dict[str, Any]]) -> pd.DataFrame:
     """
     Transform raw ThingSpeak feeds into a clean, typed pandas DataFrame.
 

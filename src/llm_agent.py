@@ -4,7 +4,10 @@ Includes deterministic offline fallbacks for key-less and test environments.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
+
+from google.api_core.exceptions import GoogleAPIError
+from google.auth.exceptions import GoogleAuthError
 
 from src.config import Settings, default_settings
 from src.preprocessing import VitalSummary
@@ -20,7 +23,7 @@ class GeminiAgent:
     Falls back gracefully to deterministic clinical synthesis if API keys are absent or offline.
     """
 
-    def __init__(self, settings: Optional[Settings] = None):
+    def __init__(self, settings: Settings | None = None):
         self.settings = settings or default_settings
         self.model = None
         self._setup_client()
@@ -33,7 +36,7 @@ class GeminiAgent:
                 genai.configure(api_key=self.settings.gemini_api_key)
                 self.model = genai.GenerativeModel(self.settings.gemini_model)
                 logger.info("Configured Gemini model: %s", self.settings.gemini_model)
-            except Exception as e:
+            except (GoogleAPIError, GoogleAuthError, TypeError, ValueError, RuntimeError, ImportError) as e:
                 logger.warning("Failed to configure Google GenAI client: %s. Using mock fallback.", e)
                 self.model = None
         else:
@@ -56,7 +59,7 @@ class GeminiAgent:
                 response = self.model.generate_content(prompt)
                 if response.text:
                     return response.text.strip()
-            except Exception as err:
+            except (GoogleAPIError, GoogleAuthError, TypeError, ValueError, RuntimeError) as err:
                 logger.warning("Gemini call failed (%s). Falling back to mock summary.", err)
 
         # Deterministic fallback summary
@@ -64,10 +67,10 @@ class GeminiAgent:
 
     def generate_rag_analysis(
         self,
-        profile: Dict[str, Any],
+        profile: dict[str, Any],
         summary: VitalSummary,
         diagnosis: ClinicalDiagnosis,
-        retrieved_cases: List[RetrievedCase],
+        retrieved_cases: list[RetrievedCase],
     ) -> str:
         """Generate an explainable, RAG-grounded diagnostic synthesis."""
         from src.vector_store import PatientRAGRetriever
@@ -96,7 +99,7 @@ class GeminiAgent:
                 response = self.model.generate_content(prompt)
                 if response.text:
                     return response.text.strip()
-            except Exception as err:
+            except (GoogleAPIError, GoogleAuthError, TypeError, ValueError, RuntimeError) as err:
                 logger.warning("Gemini RAG call failed (%s). Falling back to mock synthesis.", err)
 
         return self._mock_rag_analysis(profile, summary, diagnosis, retrieved_cases)
@@ -104,11 +107,11 @@ class GeminiAgent:
     def chat_response(
         self,
         user_message: str,
-        chat_history: List[Tuple[str, str]],
-        profile: Dict[str, Any],
+        chat_history: list[tuple[str, str]],
+        profile: dict[str, Any],
         summary: VitalSummary,
         diagnosis: ClinicalDiagnosis,
-        retrieved_cases: List[RetrievedCase],
+        retrieved_cases: list[RetrievedCase],
     ) -> str:
         """Provide conversational, grounded answers to patient inquiries."""
         from src.vector_store import PatientRAGRetriever
@@ -134,7 +137,7 @@ class GeminiAgent:
                 response = self.model.generate_content(prompt)
                 if response.text:
                     return response.text.strip()
-            except Exception as err:
+            except (GoogleAPIError, GoogleAuthError, TypeError, ValueError, RuntimeError) as err:
                 logger.warning("Gemini chat call failed (%s). Using mock response.", err)
 
         return self._mock_chat_response(user_message, summary, diagnosis)
@@ -169,10 +172,10 @@ class GeminiAgent:
 
     @staticmethod
     def _mock_rag_analysis(
-        profile: Dict[str, Any],
+        profile: dict[str, Any],
         summary: VitalSummary,
         diagnosis: ClinicalDiagnosis,
-        retrieved_cases: List[RetrievedCase],
+        retrieved_cases: list[RetrievedCase],
     ) -> str:
         """Deterministic mock RAG synthesis grounded in retrieved cases."""
         top_case_str = (

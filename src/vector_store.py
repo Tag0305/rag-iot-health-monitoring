@@ -2,10 +2,10 @@
 FAISS Vector Store and Semantic Retrieval Engine for historical patient cohorts.
 """
 
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Union
+
 import numpy as np
 import pandas as pd
 
@@ -35,15 +35,15 @@ class PatientRAGRetriever:
     IndexFlatL2 to retrieve clinically relevant historical patient cohorts.
     """
 
-    def __init__(self, settings: Optional[Settings] = None):
+    def __init__(self, settings: Settings | None = None):
         self.settings = settings or default_settings
         self.model = None
         self.index = None
-        self.df_records: Optional[pd.DataFrame] = None
-        self.dimension: Optional[int] = None
+        self.df_records: pd.DataFrame | None = None
+        self.dimension: int | None = None
         self._is_initialized = False
 
-    def initialize(self, records_path: Optional[Union[str, Path]] = None) -> None:
+    def initialize(self, records_path: str | Path | None = None) -> None:
         """Load records, load sentence-transformer model, and build FAISS index."""
         if self._is_initialized:
             return
@@ -66,8 +66,8 @@ class PatientRAGRetriever:
             ]
 
         # Lazy import of heavy ML libraries to keep lightweight operations fast
-        from sentence_transformers import SentenceTransformer
         import faiss
+        from sentence_transformers import SentenceTransformer
 
         logger.info("Loading embedding model: %s", self.settings.embedding_model_name)
         self.model = SentenceTransformer(self.settings.embedding_model_name)
@@ -84,7 +84,7 @@ class PatientRAGRetriever:
         self._is_initialized = True
         logger.info("FAISS vector store successfully initialized with %d entries.", self.index.ntotal)
 
-    def search(self, query: str, top_k: Optional[int] = None) -> List[RetrievedCase]:
+    def search(self, query: str, top_k: int | None = None) -> list[RetrievedCase]:
         """
         Perform vector similarity search against the historical patient cohort.
         """
@@ -99,7 +99,7 @@ class PatientRAGRetriever:
 
         distances, indices = self.index.search(query_embedding, k)
 
-        results: List[RetrievedCase] = []
+        results: list[RetrievedCase] = []
         for dist, idx in zip(distances[0], indices[0]):
             if idx < 0 or idx >= len(self.df_records):
                 continue
@@ -121,7 +121,7 @@ class PatientRAGRetriever:
         return results
 
     @staticmethod
-    def format_for_prompt(cases: List[RetrievedCase]) -> str:
+    def format_for_prompt(cases: list[RetrievedCase]) -> str:
         """Format retrieved cases for LLM grounding context."""
         if not cases:
             return "No historical reference records retrieved."

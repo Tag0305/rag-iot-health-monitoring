@@ -4,7 +4,6 @@ Built with Gradio, featuring patient profile controls, telemetry inspection,
 rule-based clinical alerts, FAISS historical case retrieval, and conversational AI.
 """
 
-from typing import List, Tuple
 import logging
 
 from src.config import Settings, default_settings
@@ -44,7 +43,7 @@ class HealthMonitoringApp:
         channel_id: str,
         read_key: str,
         force_mock: bool,
-    ) -> Tuple[str, str, str, str, str]:
+    ) -> tuple[str, str, str, str, str]:
         """
         Execute full clinical monitoring pipeline:
         1. Ingest telemetry from ThingSpeak or mock fallback.
@@ -124,12 +123,12 @@ class HealthMonitoringApp:
     def handle_chat(
         self,
         message: str,
-        chat_history: List[Tuple[str, str]],
+        chat_history: list[tuple[str, str]],
         age: int,
         gender: str,
         weight: float,
         height: float,
-    ) -> Tuple[List[Tuple[str, str]], str]:
+    ) -> tuple[list[tuple[str, str]], str]:
         """Handle conversational interactions grounded in current session context."""
         if not message.strip():
             return chat_history, ""
